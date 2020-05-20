@@ -1,5 +1,5 @@
 export OUT_DIR="/output/"
-export NER_DIR="/floyd/input/nerdata/BC2GM/"
+export NER_DIR="/floyd/input/nerdata/NCBI-disease/"
 export BIOBERT_DIR="/floyd/input/biobert/biobert_v1.1_pubmed/"
 export NET="squeezeDet+BN"
 

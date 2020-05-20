@@ -9,7 +9,7 @@ parser.add_argument('--biobert_dir', dest='biobert_dir' , type=str,
                     help='directory with biobert pretrained weights, config and vocab')
 
 parser.add_argument('--ner_dir', dest='ner_dir' , type=str,
-                    default='../data/NERdata/BC2GM/',
+                    default='../data/NERdata/NCBI-disease/',
                     help='directory with named entity reconition dataset')
 
 parser.add_argument('--output_dir', dest='output_dir' , type=str,
