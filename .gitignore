@@ -1,3 +1,7 @@
 *pyc
 data/
 ciphix/
+out/
+floyd.yml
+.floydexpt
+.floydignore
