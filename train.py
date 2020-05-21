@@ -27,7 +27,7 @@ cmd = ('python3 run_ner.py'
       ' --vocab_file=' + args.biobert_dir + 'vocab.txt'
       ' --bert_config_file=' + args.biobert_dir + 'bert_config.json'
       ' --init_checkpoint=' + args.biobert_dir + 'model.ckpt-1000000'
-      ' --num_train_epochs=60.0'
+      ' --num_train_epochs=1'
       ' --data_dir=' + args.ner_dir +
       ' --output_dir='  + args.output_dir)
 

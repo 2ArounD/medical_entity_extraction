@@ -77,7 +77,7 @@ flags.DEFINE_integer("predict_batch_size", 8, "Total batch size for predict.")
 
 flags.DEFINE_float("learning_rate", 5e-5, "The initial learning rate for Adam.")
 
-flags.DEFINE_float("num_train_epochs", 10.0, "Total number of training epochs to perform.")
+flags.DEFINE_float("num_train_epochs", 1.0, "Total number of training epochs to perform.")
 
 flags.DEFINE_float(
     "warmup_proportion", 0.1,
@@ -157,7 +157,7 @@ class DataProcessor(object):
                     lines.append((labelSent, wordSent))
                     words = []
                     labels = []
-                else: 
+                else:
                     print("Two continual empty lines detected!")
             else:
                 words.append(lineList[0])
@@ -189,7 +189,7 @@ class NerProcessor(DataProcessor):
 
 
     def get_labels(self):
-        return ["[PAD]", "B", "I", "O", "X", "[CLS]", "[SEP]"] 
+        return ["[PAD]", "B", "I", "O", "X", "[CLS]", "[SEP]"]
 
     def _create_example(self, lines, set_type):
         examples = []
@@ -250,10 +250,10 @@ def convert_single_example(ex_index, example, label_list, max_seq_length, tokeni
     label_ids.append(label_map["[SEP]"])
 
     input_ids = tokenizer.convert_tokens_to_ids(ntokens)
-    
+
     # The mask has 1 for real tokens and 0 for padding tokens.
     input_mask = [1] * len(input_ids)
-    
+
     # Zero-pad up to the sequence length.
     while len(input_ids) < max_seq_length:
         input_ids.append(0)
@@ -384,7 +384,7 @@ def create_model(bert_config, is_training, input_ids, input_mask,
         predict = {"predict": tf.argmax(probabilities,axis=-1), "log_probs": log_probs}
         return (loss, per_example_loss, logits, predict)
         ##########################################################################
-        
+
 def model_fn_builder(bert_config, num_labels, init_checkpoint, learning_rate,
                      num_train_steps, num_warmup_steps, use_tpu,
                      use_one_hot_embeddings):
@@ -433,7 +433,7 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, learning_rate,
                 train_op=train_op,
                 scaffold_fn=scaffold_fn)
         elif mode == tf.estimator.ModeKeys.EVAL:
-            
+
             def metric_fn(per_example_loss, label_ids, logits, num_labels):
             # def metric_fn(label_ids, logits):
                 predictions = tf.argmax(logits, axis=-1, output_type=tf.int32)
@@ -477,9 +477,9 @@ def main(_):
             "Cannot use sequence length %d because the BERT model "
             "was only trained up to sequence length %d" %
             (FLAGS.max_seq_length, bert_config.max_position_embeddings))
-    
+
     tf.gfile.MakeDirs(FLAGS.output_dir)
-    
+
     task_name = FLAGS.task_name.lower()
     if task_name not in processors:
         raise ValueError("Task not found: %s" % (task_name))
@@ -588,21 +588,21 @@ def main(_):
                 id2label = {value:key for key,value in label2id.items()}
             with open(label2idPath,'wb') as w:
                 pickle.dump(label2id,w)
-                
+
         token_path = os.path.join(FLAGS.output_dir, "token_test.txt")
         if os.path.exists(token_path):
             os.remove(token_path)
         token_modi_path = os.path.join(FLAGS.output_dir, "token_modi_test.txt")
         if os.path.exists(token_modi_path):
             os.remove(token_modi_path)
-        
+
         predict_examples = processor.get_test_examples(FLAGS.data_dir)
 
         predict_file = os.path.join(FLAGS.output_dir, "predict.tf_record")
         filed_based_convert_examples_to_features(predict_examples, label_list,
                                                 FLAGS.max_seq_length, tokenizer,
                                                 predict_file,mode="test")
-                            
+
         tf.logging.info("***** Running prediction*****")
         tf.logging.info("  Num examples = %d", len(predict_examples))
         tf.logging.info("  Batch size = %d", FLAGS.predict_batch_size)
@@ -620,15 +620,15 @@ def main(_):
 
         result = estimator.predict(input_fn=predict_input_fn)
         prf = estimator.evaluate(input_fn=predict_input_fn, steps=None)
-        
+
         tf.logging.info("***** token-level evaluation results *****")
         for key in sorted(prf.keys()):
             tf.logging.info("  %s = %s", key, str(prf[key]))
-        
+
         output_predict_file = os.path.join(FLAGS.output_dir, "label_test.txt")
         with open(output_predict_file,'w') as writer:
             for resultIdx, prediction in enumerate(result):
-                # Fix for "padding occurrence amid sentence" error 
+                # Fix for "padding occurrence amid sentence" error
                 # (which occasionally cause mismatch between the number of predicted tokens and labels.)
                 assert len(prediction["predict"]) == len(prediction["input_mask"]), "len(prediction['predict']) != len(prediction['input_mask']) Please report us!"
                 predLabelSent = []
