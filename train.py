@@ -1,6 +1,5 @@
 import os
 import argparse
-import pdb
 
 
 parser = argparse.ArgumentParser()
@@ -22,14 +21,16 @@ args = parser.parse_args()
 #Check if dir end with /
 
 cmd = ('python3 run_ner.py'
-      ' --do_train=true'
+      ' --do_train=false'
       ' --do_eval=true'
+      ' --do_predict=false'
       ' --vocab_file=' + args.biobert_dir + 'vocab.txt'
       ' --bert_config_file=' + args.biobert_dir + 'bert_config.json'
       ' --init_checkpoint=' + args.biobert_dir + 'model.ckpt-1000000'
-      ' --num_train_epochs=1'
+      ' --num_train_epochs=0.1' +
       ' --data_dir=' + args.ner_dir +
-      ' --output_dir='  + args.output_dir)
+      ' --output_dir='  + '/home/arnoud/Documents/Sollicitaties/Ciphix/case/medical_entity_extraction/out/2around-projects-meder-13-output' +
+      ' --create_SavedModel=true')
 
 os.chdir('./biobert')
 os.system(cmd)

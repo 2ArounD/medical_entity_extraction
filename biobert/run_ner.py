@@ -55,7 +55,7 @@ flags.DEFINE_bool(
 )
 
 flags.DEFINE_integer(
-    "max_seq_length", 128, # 384 recommended for longer sentences
+    "max_seq_length", 256, # 384 recommended for longer sentences
     "The maximum total input sequence length after WordPiece tokenization."
 )
 
@@ -67,7 +67,9 @@ flags.DEFINE_bool("use_tpu", False, "Whether to use TPU or GPU/CPU.")
 
 flags.DEFINE_bool("do_eval", False, "Whether to run eval on the dev set.")
 
-flags.DEFINE_bool("do_predict", True,"Whether to run the model in inference mode on the test set.")
+flags.DEFINE_bool("do_predict", True, "Whether to run the model in inference mode on the test set.")
+
+flags.DEFINE_bool('create_SavedModel', False, "Whether to export the model to SavedModel format after training." )
 
 flags.DEFINE_integer("train_batch_size", 32, "Total batch size for training.")
 
@@ -75,7 +77,7 @@ flags.DEFINE_integer("eval_batch_size", 8, "Total batch size for eval.")
 
 flags.DEFINE_integer("predict_batch_size", 8, "Total batch size for predict.")
 
-flags.DEFINE_float("learning_rate", 5e-5, "The initial learning rate for Adam.")
+flags.DEFINE_float("learning_rate", 1e-5, "The initial learning rate for Adam.")
 
 flags.DEFINE_float("num_train_epochs", 1.0, "Total number of training epochs to perform.")
 
@@ -356,6 +358,8 @@ def create_model(bert_config, is_training, input_ids, input_mask,
 
     output_layer = model.get_sequence_output()
 
+
+
     hidden_size = output_layer.shape[-1].value
 
     output_weight = tf.get_variable(
@@ -382,8 +386,11 @@ def create_model(bert_config, is_training, input_ids, input_mask,
         loss = tf.reduce_sum(per_example_loss)
         probabilities = tf.nn.softmax(logits, axis=-1)
         predict = {"predict": tf.argmax(probabilities,axis=-1), "log_probs": log_probs}
+
         return (loss, per_example_loss, logits, predict)
         ##########################################################################
+
+
 
 def model_fn_builder(bert_config, num_labels, init_checkpoint, learning_rate,
                      num_train_steps, num_warmup_steps, use_tpu,
@@ -402,7 +409,11 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, learning_rate,
         (total_loss, per_example_loss, logits, predictsDict) = create_model(
             bert_config, is_training, input_ids, input_mask, segment_ids, label_ids,
             num_labels, use_one_hot_embeddings)
-        predictsDict["input_mask"] = input_mask
+
+
+        # predictsDict["input_mask"] = input_mask !!!!!!!!!!!!!!!!!!!! ##############
+
+
         tvars = tf.trainable_variables()
         scaffold_fn = None
         if init_checkpoint:
@@ -460,6 +471,20 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, learning_rate,
             )
         return output_spec
     return model_fn
+
+def serving_input_fn():
+    label_ids = tf.placeholder(tf.int32, [None], name='label_ids')
+    input_ids = tf.placeholder(tf.int32, [None, FLAGS.max_seq_length], name='input_ids')
+    input_mask = tf.placeholder(tf.int32, [None, FLAGS.max_seq_length], name='input_mask')
+    segment_ids = tf.placeholder(tf.int32, [None, FLAGS.max_seq_length], name='segment_ids')
+    input_fn = tf.estimator.export.build_raw_serving_input_receiver_fn({
+        'label_ids': label_ids,
+        'input_ids': input_ids,
+        'input_mask': input_mask,
+        'segment_ids': segment_ids,
+    })()
+
+    return input_fn
 
 
 def main(_):
@@ -566,6 +591,7 @@ def main(_):
             seq_length=FLAGS.max_seq_length,
             is_training=False,
             drop_remainder=eval_drop_remainder)
+
         result = estimator.evaluate(input_fn=eval_input_fn, steps=eval_steps)
         output_eval_file = os.path.join(FLAGS.output_dir, "eval_results.txt")
         with open(output_eval_file, "w") as writer:
@@ -641,6 +667,11 @@ def main(_):
                             predLabelSent.append(id2label[predLabel])
                 output_line = "\n".join(predLabelSent) + "\n"
                 writer.write(output_line)
+
+    if FLAGS.create_SavedModel:
+        export_path = os.path.join(FLAGS.output_dir, "savedmodel")
+        estimator._export_to_tpu = False
+        estimator.export_savedmodel(export_path, serving_input_fn, strip_default_attrs=True, checkpoint_path='/home/arnoud/Documents/Sollicitaties/Ciphix/case/medical_entity_extraction/out/2around-projects-meder-13-output/model.ckpt-198')
 
 if __name__ == "__main__":
     flags.mark_flag_as_required("data_dir")
