@@ -1,7 +1,6 @@
 # Medical entity extraction
-This repository provides the code for fine-tuning BioBERT, an adapted version of the BioBERT repository is included.
-Please refer to our paper  for more details.
-This project is done by [DMIS-Lab](https://dmis.korea.ac.kr).
+This repository provides the code for fine-tuning and serving BioBERT. An adapted version of the BioBERT repository is included.
+
 
 ## Download
 Below you can find a download with necessary data. The data folder contains;
@@ -22,7 +21,9 @@ Install the requirements in requirements.txt
 Install tensorflow-model-server with the following commands:
 
 `echo "deb [arch=amd64] http://storage.googleapis.com/tensorflow-serving-apt stable tensorflow-model-server tensorflow-model-server-universal" | sudo tee /etc/apt/sources.list.d/tensorflow-serving.list`
+
 `curl https://storage.googleapis.com/tensorflow-serving-apt/tensorflow-serving.release.pub.gpg | sudo apt-key add -`
+
 `sudo apt-get update && sudo apt-get install tensorflow-model-server`
 
 ## Instructions for training
@@ -37,17 +38,3 @@ reachable by going to http://localhost:5000/ . The demo lets you choose between 
 will let you upload a pdf. In data/demo_sample 4 example pdfs are given.
 
 ## Extra information on data
-
-## Citation
-```
-@article{10.1093/bioinformatics/btz682,
-    author = {Lee, Jinhyuk and Yoon, Wonjin and Kim, Sungdong and Kim, Donghyeon and Kim, Sunkyu and So, Chan Ho and Kang, Jaewoo},
-    title = "{BioBERT: a pre-trained biomedical language representation model for biomedical text mining}",
-    journal = {Bioinformatics},
-    year = {2019},
-    month = {09},
-    issn = {1367-4803},
-    doi = {10.1093/bioinformatics/btz682},
-    url = {https://doi.org/10.1093/bioinformatics/btz682},
-}
-```
