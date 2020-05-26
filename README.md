@@ -14,7 +14,7 @@ Extra information on the content of data can be found below under "Extra informa
 ## Installation
 This section describes the steps for installation to be able to run the training and demo.
 
-Extract the downloaded data folder into `data`
+Extract the downloaded data folder into `data`, at the root of the repository
 
 Install the requirements in requirements.txt
 

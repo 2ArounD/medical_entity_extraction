@@ -1,3 +1,0 @@
-[submodule "biobert"]
-	path = biobert
-	url = https://github.com/dmis-lab/biobert.git
