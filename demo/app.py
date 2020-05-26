@@ -38,6 +38,10 @@ def upload_file():
 
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
+
+            if not os.path.exists(app.config['UPLOAD_FOLDER']):
+                os.makedirs(app.config['UPLOAD_FOLDER'])
+
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             # Extract all the text from the pdf
             raw_text = textract.process(os.path.join(app.config['UPLOAD_FOLDER'], filename))
@@ -64,6 +68,9 @@ def upload_file():
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
+    if not os.path.exists(app.config['UPLOAD_FOLDER']):
+                os.makedirs(app.config['UPLOAD_FOLDER'])
+
     return send_from_directory(app.config['UPLOAD_FOLDER'],
                                filename)
 

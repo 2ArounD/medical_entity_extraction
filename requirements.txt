@@ -1,4 +1,3 @@
-packages:
 
 tensorflow==1.11.0 (under 2.0.0)
 tensorflow-serving-api==1.11.0
@@ -6,4 +5,6 @@ sklearn
 pandas
 perl
 textract
+flask
 Flask-Markdown
+requests
