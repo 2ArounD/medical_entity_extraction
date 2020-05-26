@@ -3,7 +3,8 @@
 """
 Copyright 2018 The Google AI Language Team Authors.
 BASED ON Google_BERT.
-@Author:zhoukaiyin
+Adapted version of run_ner.py from biobert https://github.com/dmis-lab/biobert
+Adapted by Arnoud JOoker
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -55,7 +56,7 @@ flags.DEFINE_bool(
 )
 
 flags.DEFINE_integer(
-    "max_seq_length", 256, # 384 recommended for longer sentences
+    "max_seq_length", 128, # 384 recommended for longer sentences
     "The maximum total input sequence length after WordPiece tokenization."
 )
 
@@ -358,8 +359,6 @@ def create_model(bert_config, is_training, input_ids, input_mask,
 
     output_layer = model.get_sequence_output()
 
-
-
     hidden_size = output_layer.shape[-1].value
 
     output_weight = tf.get_variable(
@@ -410,8 +409,8 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, learning_rate,
             bert_config, is_training, input_ids, input_mask, segment_ids, label_ids,
             num_labels, use_one_hot_embeddings)
 
-
-        # predictsDict["input_mask"] = input_mask !!!!!!!!!!!!!!!!!!!! ##############
+        if not FLAGS.create_SavedModel:
+            predictsDict["input_mask"] = input_mask # Gives problems with savedmodel!!
 
 
         tvars = tf.trainable_variables()
@@ -472,6 +471,7 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, learning_rate,
         return output_spec
     return model_fn
 
+# Input function used for SavedModel to serve the model
 def serving_input_fn():
     label_ids = tf.placeholder(tf.int32, [None], name='label_ids')
     input_ids = tf.placeholder(tf.int32, [None, FLAGS.max_seq_length], name='input_ids')
@@ -502,6 +502,9 @@ def main(_):
             "Cannot use sequence length %d because the BERT model "
             "was only trained up to sequence length %d" %
             (FLAGS.max_seq_length, bert_config.max_position_embeddings))
+
+    if FLAGS.create_SavedModel:
+        FLAGS.do_predict=False
 
     tf.gfile.MakeDirs(FLAGS.output_dir)
 
@@ -626,8 +629,8 @@ def main(_):
 
         predict_file = os.path.join(FLAGS.output_dir, "predict.tf_record")
         filed_based_convert_examples_to_features(predict_examples, label_list,
-                                                FLAGS.max_seq_length, tokenizer,
-                                                predict_file,mode="test")
+                                                 FLAGS.max_seq_length, tokenizer,
+                                                 predict_file,mode="test")
 
         tf.logging.info("***** Running prediction*****")
         tf.logging.info("  Num examples = %d", len(predict_examples))
@@ -654,6 +657,8 @@ def main(_):
         output_predict_file = os.path.join(FLAGS.output_dir, "label_test.txt")
         with open(output_predict_file,'w') as writer:
             for resultIdx, prediction in enumerate(result):
+                pass
+                # This piece of code depends on prediction["input_mask"], which interferes with estimator export savedmodel
                 # Fix for "padding occurrence amid sentence" error
                 # (which occasionally cause mismatch between the number of predicted tokens and labels.)
                 assert len(prediction["predict"]) == len(prediction["input_mask"]), "len(prediction['predict']) != len(prediction['input_mask']) Please report us!"
@@ -668,10 +673,11 @@ def main(_):
                 output_line = "\n".join(predLabelSent) + "\n"
                 writer.write(output_line)
 
+    # Added functionality to create a SavedModel after training with correct input_fn
     if FLAGS.create_SavedModel:
         export_path = os.path.join(FLAGS.output_dir, "savedmodel")
         estimator._export_to_tpu = False
-        estimator.export_savedmodel(export_path, serving_input_fn, strip_default_attrs=True, checkpoint_path='/home/arnoud/Documents/Sollicitaties/Ciphix/case/medical_entity_extraction/out/2around-projects-meder-13-output/model.ckpt-198')
+        estimator.export_savedmodel(export_path, serving_input_fn, strip_default_attrs=True)
 
 if __name__ == "__main__":
     flags.mark_flag_as_required("data_dir")

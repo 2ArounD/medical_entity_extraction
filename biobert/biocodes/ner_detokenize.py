@@ -1,5 +1,5 @@
-# Copyright DMIS Lab. BioBERT Authors. http://dmis.korea.ac.kr 
-# 
+# Copyright DMIS Lab. BioBERT Authors. http://dmis.korea.ac.kr
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -26,12 +26,12 @@ args = parser.parse_args()
 def detokenize(pred_token_test_path, pred_label_test_path):
     """
     convert suub-word level BioBERT-NER results to full words and labels.
-        
+
     Args:
         pred_token_test_path: path to token_test.txt from output folder. ex) output/token_test.txt
         pred_label_test_path: path to label_test.txt from output folder. ex) output/label_test.txt
     Outs:
-        A dictionary that contains full words and predicted labels. 
+        A dictionary that contains full words and predicted labels.
     """
 
     # read predicted
@@ -40,15 +40,15 @@ def detokenize(pred_token_test_path, pred_label_test_path):
         for lineIdx, (lineTok, lineLab) in enumerate(zip(in_tok, in_lab)):
             lineTok = lineTok.strip()
             pred['toks'].append(lineTok)
-            
+
             lineLab = lineLab.strip()
             if lineLab in ['[CLS]','[SEP]', 'X']: # replace non-text tokens with O. These will not be evaluated.
                 pred['labels'].append('O')
                 continue
             pred['labels'].append(lineLab)
-        
+
     assert (len(pred['toks']) == len(pred['labels'])), "Error! : len(pred['toks'])(%s) != len(pred['labels'])(%s) : Please report us "%(len(pred['toks']), len(pred['labels']))
-    
+
     bert_pred = {'toks':[], 'labels':[], 'sentence':[]}
     buf = []
     for t, l in zip(pred['toks'], pred['labels']):
@@ -66,16 +66,16 @@ def detokenize(pred_token_test_path, pred_label_test_path):
             bert_pred['toks'].append(t)
             bert_pred['labels'].append(l)
             buf.append(t)
-    
+
     assert (len(bert_pred['toks']) == len(bert_pred['labels'])), ("Error! : len(bert_pred['toks']) != len(bert_pred['labels']) : Please report us")
-    
+
     return bert_pred
 
 def transform2CoNLLForm(golden_path, output_dir, bert_pred, debug):
     """
     Produce NER_result_conll.txt file that suits conlleval.pl
     Output : Line-seperated list of words, answer tags and predicted tags
-    ex) 
+    ex)
     Association O-MISC O-MISC
     of O-MISC O-MISC
     ...
@@ -103,7 +103,7 @@ def transform2CoNLLForm(golden_path, output_dir, bert_pred, debug):
                 print("Exception at line no : %s"%lineIdx, e)
 
         if len(buf) == 0: # If the file is ending with a space : remove the last CLS
-            ans['toks'] = ans['toks'][:-1] 
+            ans['toks'] = ans['toks'][:-1]
             ans['labels'] = ans['labels'][:-1]
         else: # If the file is not ending with a space
             ans['toks'].append('[SEP]')
@@ -114,7 +114,7 @@ def transform2CoNLLForm(golden_path, output_dir, bert_pred, debug):
 
     if debug:
         ansCount = 0
-        prdCount = 0 
+        prdCount = 0
         with open(output_dir+'/NER_result_sent-debug.txt', 'w') as out_:
             for ans_sent, pred_sent in zip(ans['sentence'], bert_pred['sentence']):
                 out_.write("ANS (%s): "%(len(ans_sent)) + " ".join(ans_sent)+"\n")
@@ -123,11 +123,11 @@ def transform2CoNLLForm(golden_path, output_dir, bert_pred, debug):
                 ansCount += len(ans_sent)
                 prdCount += len(pred_sent)
                 assert ansCount == prdCount, "\nans_sent : %s\npred_sent : %s"%(ans_sent, pred_sent)
-    
+
         assert len(ans['sentence']) == len(bert_pred['sentence']), ( "len(ans['sentence'])(%s) == len(bert_pred['sentence'])(%s)"%(len(ans['sentence']), len(bert_pred['sentence'])))
 
         assert (len(ans['labels']) == len(bert_pred['labels'])), ("Error! : len(ans['labels'])(%s) != len(bert_pred['labels'])(%s) : Please report us"%(len(ans['labels']), len(bert_pred['labels'])))
-    
+
     print("len(bert_pred['toks']): ", len(bert_pred['toks']), "len(ans['labels']): ", len(ans['labels']))
     with open(output_dir+'/NER_result_conll.txt', 'w') as out_:
         offset = 0 # Since some sentences can be trimmed due to max_seq_length, we use offset method.
