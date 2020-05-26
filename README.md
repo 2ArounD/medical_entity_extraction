@@ -3,15 +3,15 @@ This repository provides the code for fine-tuning and serving BioBERT. An adapte
 
 
 ## Download
-Below you can find a download with necessary data. The data folder contains:
+Below you can find a download link with necessary data. The data folder contains:
 * BioBERT pretrained parameters and config (provided by BioBERT)
 * Datasets for medical entity extraction
 * Tensorflow SavedModels of finetuned BioBERT on NCBI and BC4CHEMD
-* Data for demonstrations (PDFS)
+* Data for demonstrations (PDFs)
 
 https://drive.google.com/file/d/1wX14V5K10QWGEmw7h1iVUwr9VSVyI5aG/view?usp=sharing
 
-Extra information on the content of data can be found below under "Extra information on data"
+Extra information on the content of data can be found below under section "Extra information on data"
 
 ## Installation
 This section describes the steps for installation to be able to run the training and demo.
@@ -35,7 +35,7 @@ Training can be started by running `train.py`. `train.py` accepts optional argum
 --biobert_dir , --ner_dir , --ckpt_dir and --output_dir . The default values start a training on NCBI dataset with pretrained BioBERT parameters. When training is finished, checkpoints, eval_results and
 a Tensorflow SavedModel can be found in the output directory.
 
-## Instructions for demo
+## Instructions for the demo
 The demo is started by running `run_demo.py`. The demo can be shown in a browser under port 5000,
 reachable by going to http://localhost:5000/ . The demo lets you choose between type of entity extraction and
 will let you upload a pdf. In `data/demo_sample` 4 example pdfs are given.
@@ -50,9 +50,9 @@ In the folder `NERdata` 8 datasets for named entity recognition are stored:
 * Gene/protein: BC2GM, JNLPBA
 * Species: linnaeus, s800
 
-In the folder pre_training the v1.1 pubmed bioBert pre-trained parameters are stored, together with the bert_config.json
+In the folder `pre_training` the v1.1 pubmed bioBert pre-trained parameters are stored, together with the bert_config.json
 
-In the folder SavedModels, 2 folders with Tensorflow SavedModel are stored. One folder with models trained on BC4CHEMD and one folder with models trained on NCBI. The folders contain version-folders of the models. The demo-app selects the newest version of a model by default. The demo-app can be extended by training on the other datasets and adding the resulting SavedModels in this folder. Below the evaluations results of the `./biobert/biocodes/conlleval.pl` on the SavedModels are listed.
+In the folder SavedModels, 2 folders with Tensorflow SavedModels are stored. One folder with models trained on BC4CHEMD and one folder with models trained on NCBI. The folders contain version-folders of the models. The demo-app selects the newest version of a model by default. The demo-app can be extended by training on the other datasets and adding the resulting SavedModels in this folder. Below the evaluations results of the `./biobert/biocodes/conlleval.pl` on the most recent SavedModels are listed.
 
 BC4CHEMD:
 
