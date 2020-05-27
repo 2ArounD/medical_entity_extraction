@@ -32,7 +32,7 @@ $ sudo apt-get update && sudo apt-get install tensorflow-model-server
 
 ## Instructions for training
 Training can be started by running `train.py`. `train.py` accepts optional arguments for
---biobert_dir , --ner_dir , --ckpt_dir and --output_dir . The default values start a training on NCBI dataset with pretrained BioBERT parameters. When training is finished, checkpoints, eval_results and
+--biobert_dir , --ner_dir , --ckpt_file and --output_dir . The default values start a training on NCBI dataset with pretrained BioBERT parameters. When training is finished, checkpoints, eval_results and
 a Tensorflow SavedModel can be found in the output directory.
 
 ## Instructions for the demo

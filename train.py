@@ -9,11 +9,12 @@ parser.add_argument('--biobert_dir', dest='biobert_dir' , type=str,
                     help='directory with biobert pretrained weights, config and vocab')
 
 parser.add_argument('--ner_dir', dest='ner_dir' , type=str,
-                    default='../data/NERdata/NCBI-disease',
-                    help='directory with named entity reconition dataset/')
+                    default='../data/NERdata/NCBI-disease/',
+                    help='directory with named entity reconition dataset')
 
-parser.add_argument('--ckpt_dir', dest='ckpt_dir' , type=str,
-                    default='../data/pre_training/biobert_v1.1_pubmed/',
+# ckpt_file should end with model.ckpt-######
+parser.add_argument('--ckpt_file', dest='ckpt_file' , type=str,
+                    default='../data/pre_training/biobert_v1.1_pubmed/model.ckpt-1000000',
                     help='directory where ckpts for resuming training are stored')
 
 parser.add_argument('--output_dir', dest='output_dir' , type=str,
@@ -33,7 +34,7 @@ cmd = ('python3 run_ner.py'
        ' --do_predict=false'
       ' --vocab_file=' + args.biobert_dir + 'vocab.txt'
        ' --bert_config_file=' + args.biobert_dir + 'bert_config.json'
-       ' --init_checkpoint=' + args.ckpt_dir +
+       ' --init_checkpoint=' + args.ckpt_file +
        ' --num_train_epochs=5' +
        ' --data_dir=' + args.ner_dir +
        ' --output_dir='  + args.output_dir +
